@@ -1,6 +1,90 @@
+
 import os
 
+#google trans
+from googletrans import Translator
 
+#install bs4 module : pip install bs4
+
+import requests
+from bs4 import BeautifulSoup
+
+##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+def articleReturn(url):
+    article=""
+    r = requests.get(url)
+    soup = BeautifulSoup(r.text, 'html.parser')
+    bodycontent= soup.find("div", {"class":"story-body"})
+    for p in bodycontent.find_all("p", {"class":"story-body-text story-content"}):
+        sentence=p.text.strip("p")#will return Nontype object is not callable is no .text
+        article+=sentence+"</p><br></br><p> "
+    return article
+        
+
+
+##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+def translate(word):
+    translator = Translator()
+    r=translator.translate(word)
+    return(r.text)
+
+##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+url=input("url:")
+string=articleReturn(url)
+
+wordList = string.split()
+iterations=len(wordList)
+
+popUpContent=""
+styleType=""
+p=""
+leftover=""
+
+#repeats # of times characters appear in string
+for i in range(0,iterations): #popupBoxPosition starts at 0 
+    word=wordList[i]
+
+
+    styleType+= '''#popupBox'''+str(i)+'''Position{
+                                top: 0; left: 0; position: fixed; width: 100%; height: 120%;
+                                background-color: rgba(0,0,0,0.7); display: none;}
+                '''
+
+    popUpContent+='''<div id="popupBox'''+str(i)+'''Position"> 
+                            <div class="popupBoxWrapper">
+                                    <div class="popupBoxContent">
+                                            <h3>'''+wordList[i]+'''</h3>
+                                            <p>'''+translate(word)+'''</p>
+                                            <p>Click <a href="javascript:void(0)" onclick="toggle_visibility('popupBox'''+str(i)+'''Position');">here</a> to close</p>
+                                            
+                                    </div>
+                            </div>
+                    </div>
+
+                 '''
+
+    if i%11 == 0 and i!=0:
+        wrapper="" 
+        
+        for x in range(i-11, i):
+            
+            wrapper+='''<a href="javascript:void(0)" style="text-decoration:none; color: #000000; font-size:24px;" onclick="toggle_visibility('popupBox'''+str(x)+'''Position')">'''+wordList[x]+'''  </a>'''
+        p+='''<p>'''+wrapper+'''</p>'''
+
+##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+n=(iterations//11)*11
+for x in range(n,iterations):
+    leftover+='''<a href="javascript:void(0)" style="text-decoration:none; color: #000000; font-size:24px;" onclick="toggle_visibility('popupBox'''+str(x)+'''Position')">'''+wordList[x]+'''  </a>'''
+
+
+##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 stringToSave=(
 
 '''<!DOCTYPE html>
@@ -22,14 +106,7 @@ stringToSave=(
 
                 <style type="text/css">
 
-                        #popupBoxOnePosition{
-                                top: 0; left: 0; position: fixed; width: 100%; height: 120%;
-                                background-color: rgba(0,0,0,0.7); display: none;
-                        }
-                      #popupBoxTwoPosition{
-                                top: 0; left: 0; position: fixed; width: 100%; height: 120%;
-                                background-color: rgba(0,0,0,0.7); display: none;
-                        }
+                        '''+styleType+'''
                         
                         .popupBoxWrapper{
                                 width: 550px; margin: 50px auto; text-align: left;
@@ -44,35 +121,12 @@ stringToSave=(
 
         <body>
 
-                <div id="popupBoxOnePosition">
-                        <div class="popupBoxWrapper">
-                                <div class="popupBoxContent">
-                                        <h3>Word 1</h3>
-                                        <p>translation</p>
-                                        <p>Click <a href="javascript:void(0)" onclick="toggle_visibility('popupBoxOnePosition');">here</a> to close</p>
-                                        
-                                </div>
-                        </div>
-                </div>
+                '''+popUpContent+'''
 
-                <div id="popupBoxTwoPosition">
-                        <div class="popupBoxWrapper">
-                                <div class="popupBoxContent">
-                                        <h3>Word 2</h3>
-                                        <p>translation</p>
-                                        <p>Click <a href="javascript:void(0)" onclick="toggle_visibility('popupBoxTwoPosition');">here</a> to close</p>
-                                        
-                                </div>
-                        </div>
-                </div>
+                <div id="wrapper" align="center">
 
-                <div id="wrapper">
-
-                        <p>
-                        <a href="javascript:void(0)" style="text-decoration:none; color: #000000;" onclick="toggle_visibility('popupBoxOnePosition');">word 1</a>
-                        <a href="javascript:void(0)" style="text-decoration:none; color: #000000;" onclick="toggle_visibility('popupBoxTwoPosition');"> word 2</a>
-                        </p>
-                        
+                        '''+p+'''
+                        '''+leftover+'''
 
                 </div>
 
@@ -89,5 +143,9 @@ myFile.write(stringToSave)
 myFile.close()#close file to modify
 
 os.startfile(fileName)
+
+
+
+
 
 
