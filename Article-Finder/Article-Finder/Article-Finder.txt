@@ -1,7 +1,7 @@
 
 import os
 
-#google trans
+#install google trans: pip install googletrans
 from googletrans import Translator
 
 #install bs4 module : pip install bs4
@@ -13,23 +13,28 @@ from bs4 import BeautifulSoup
 
 def articleReturn(url):
     article=""
-    r = requests.get(url)
-    soup = BeautifulSoup(r.text, 'html.parser')
+    r = requests.get(url)#load data
+    soup = BeautifulSoup(r.text, 'html.parser')#load data into bs4, make an object  
     bodycontent= soup.find("div", {"class":"story-body"})
+    
     for p in bodycontent.find_all("p", {"class":"story-body-text story-content"}):
         sentence=p.text.strip("p")#will return Nontype object is not callable is no .text
         article+=sentence+"</p><br></br><p> "
+        
     return article
         
+#articleReturn function uses a similar format to the example source-
+#code in Engineering Man's video: "Python Web Scraping with Beautiful Soup and Regex"
 
 
 ##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 
 def translate(word):
     translator = Translator()
     r=translator.translate(word)
     return(r.text)
+
+#translator function uses the free open-source module: googletrans for python
 
 ##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -37,6 +42,7 @@ def translate(word):
 url=input("url:")
 string=articleReturn(url)
 
+#converting artilce to list of words
 wordList = string.split()
 iterations=len(wordList)
 
@@ -45,8 +51,10 @@ styleType=""
 p=""
 leftover=""
 
-#repeats # of times characters appear in string
-for i in range(0,iterations): #popupBoxPosition starts at 0 
+#for each word in the article, a styleType and Popupcontent box must be created
+#Both run in the HTML document in JS format
+
+for i in range(0,iterations): #popupBoxPosition starts at 0; words are in a list
     word=wordList[i]
 
 
@@ -67,7 +75,8 @@ for i in range(0,iterations): #popupBoxPosition starts at 0
                     </div>
 
                  '''
-
+#for each occurance of 11 characters, a cluster of links displayed as the original characters
+#are embedded in a p tag, creating a single row of characters
     if i%11 == 0 and i!=0:
         wrapper="" 
         
@@ -76,15 +85,17 @@ for i in range(0,iterations): #popupBoxPosition starts at 0
             wrapper+='''<a href="javascript:void(0)" style="text-decoration:none; color: #000000; font-size:24px;" onclick="toggle_visibility('popupBox'''+str(x)+'''Position')">'''+wordList[x]+'''  </a>'''
         p+='''<p>'''+wrapper+'''</p>'''
 
-##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-
+#leftover characters embedded in a p tag
+        
 n=(iterations//11)*11
 for x in range(n,iterations):
     leftover+='''<a href="javascript:void(0)" style="text-decoration:none; color: #000000; font-size:24px;" onclick="toggle_visibility('popupBox'''+str(x)+'''Position')">'''+wordList[x]+'''  </a>'''
 
 
 ##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#CSS template
+
 stringToSave=(
 
 '''<!DOCTYPE html>
@@ -135,6 +146,14 @@ stringToSave=(
 </html>'''
     )
 
+#pop-up box formatting in CSS is inspired by mjdwebdesign's video:
+#"HTML, CSS & JS - Creating quick, simple popup boxes"
+
+
+##------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+#Export CSS to a writing document, saved as an HTML file
+
 fileName = "project.html"
 myFile = open(fileName,'w')#w stands for writing
 
@@ -142,8 +161,8 @@ myFile.write(stringToSave)
 
 myFile.close()#close file to modify
 
+#open webpage
 os.startfile(fileName)
-
 
 
 
